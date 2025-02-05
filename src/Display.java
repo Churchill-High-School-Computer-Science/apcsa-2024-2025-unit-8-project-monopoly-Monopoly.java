@@ -10,6 +10,7 @@ public class Display extends JFrame {
     static ArrayList<Player> players = new ArrayList<>(1);
     static JButton communityChest = new JButton("Community Chest");
     static JButton chance = new JButton("Chance");
+    static JButton dice = new JButton("Roll Dice");
     static JLabel diceDisplay = new JLabel();
     static JFrame frame = new JFrame("Monopoly Game");
     static JPanel boardPanel = new JPanel() {
@@ -19,23 +20,15 @@ public class Display extends JFrame {
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g;
 
-            // Draw the board background
-            g2d.setColor(new Color(240, 230, 200));
+            g2d.setColor(new Color(205, 230, 208));
             g2d.fillRect(0, 0, 75 * 11, 75 * 11);
 
-            // Draw grid and properties
             g2d.setColor(Color.BLACK);
             for (int i = 0; i < properties.length; i++) {
                 for (int j = 0; j < properties[i].length; j++) {
                     if (i == 0 || i == 10 || j == 0 || j == 10) {
                         g2d.setColor(Color.BLACK);
                         g2d.drawRect(i * 75, j * 75, 75, 75);
-                       /*  if (properties[i][j] == null) {
-                            properties[i][j] = new Property();
-                            
-                        }
-                        drawProperty(properties[i][j], g2d, i, j);
-                        for testing*/
                          if (properties[i][j] != null) {
                             drawProperty(properties[i][j], g2d, i, j);
                         }
@@ -44,7 +37,6 @@ public class Display extends JFrame {
                 }
             }
 
-            //Draw player assets
             drawPlayerAssets(g2d);
             drawPlayers(g2d);
         }
@@ -57,26 +49,23 @@ public class Display extends JFrame {
                     int xoffset = 0;
                     int yoffset = 0;
 
-                    //top row
-                    if(p.getLocation() < 11){
-                        xoffset = p.getLocation() * 75;
-                    }
-
-                    //bottom row
-                    else if(p.getLocation() > 19 && p.getLocation() < 31){
-                        xoffset = (30 - p.getLocation()) * 75;
+                    if (p.getLocation() < 11) { 
+                        xoffset = 750 - (p.getLocation() * 75);
                         yoffset = 750;
                     }
 
-                    //right side
-                    else if(p.getLocation() > 10 && p.getLocation() < 20){
-                        yoffset = (p.getLocation()-10) * 75;
+                    else if (p.getLocation() > 19 && p.getLocation() < 31) { 
+                        xoffset = 0 + ((p.getLocation() - 20) * 75);
+                        yoffset = 0;
+                    }
+
+                    else if (p.getLocation() > 10 && p.getLocation() < 20) { 
+                        yoffset = 750 - ((p.getLocation() - 10) * 75);
                         xoffset = 750;
                     }
 
-                    else if(p.getLocation() > 30 && p.getLocation() < 40){
-
-                        yoffset = (40 - p.getLocation()) * 75;
+                    else if (p.getLocation() > 30 && p.getLocation() < 40) { 
+                        yoffset = 0 + ((p.getLocation() - 30) * 75);
                         xoffset = 0;
                     }
 
@@ -101,10 +90,28 @@ public class Display extends JFrame {
             g2d.fillRect(x * 75, y * 75, 75, 75 / 4);
 
             // Draw property name
+            int nameOffset = y * 75 + 65;
             g2d.setColor(Color.BLACK);
             g2d.setFont(new Font("SansSerif", Font.PLAIN, 10));
-            g2d.drawString(p.getName(), x * 75 + 5, y * 75 + 65);
-
+            if(p.getName().length() > 12){
+                String[] names = p.getName().split(" ");
+                if(names.length == 3){
+                    nameOffset -= 10;
+                    g2d.drawString(names[0] + names[1], x * 75 + 5, nameOffset);
+                    nameOffset += 10;
+                    g2d.drawString(names[2], x * 75 + 5, nameOffset);
+                }
+                else{
+                    nameOffset -= 10;
+                    g2d.drawString(names[0], x * 75 + 5, nameOffset);
+                    nameOffset += 10;
+                    g2d.drawString(names[1], x * 75 + 5, nameOffset);
+                }
+ 
+            }
+            else{
+                g2d.drawString(p.getName(), x * 75 + 5, nameOffset);
+            }
             //Draw houses
             g2d.setColor(new Color(50, 168, 82));
             int offset = 0;
@@ -116,7 +123,6 @@ public class Display extends JFrame {
 
         private void drawPlayerAssets(Graphics2D g2d) {
 
-           // System.out.println(players.size());
             
             int playerOffset = 0;
             int propertyOffset = 25;
@@ -150,41 +156,63 @@ public class Display extends JFrame {
         }
     };
 
+    @SuppressWarnings("Convert2Lambda")
     public static void setupFrame() {
 
         frame.setSize(1000, 1000);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
-        frame.setLayout(null); // Allow manual positioning
+        frame.setLayout(null); 
 
-        // Configure buttons
-        communityChest.setBackground(new Color(0, 100, 200));
+       
+        communityChest.setBackground(new Color(51, 153, 255));
         communityChest.setBounds(200, 200, 150, 50);
         frame.add(communityChest);
 
-        chance.setBackground(new Color(0, 100, 200));
+        chance.setBackground(new Color(255, 153, 0));
         chance.setBounds(400, 200, 150, 50);
         frame.add(chance);
 
+        dice.setBackground(new Color(255, 153, 0));
+        dice.setBounds(600, 200, 150, 50);
+        frame.add(dice);
+
+
         //Config dice display
-        diceDisplay.setBounds(600, 160, 100, 100);
+        diceDisplay.setBounds(639, 230, 100, 100);
         diceDisplay.setBackground(new Color(255, 255, 255));
         diceDisplay.setText("No rolls yet!");
         frame.add(diceDisplay);
-
+      
+      
+      
         communityChest.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(frame, "Community Chest Button Clicked!");
+                Cards.Card card = Cards.drawRandomCommunityChestCard();
+                JOptionPane.showMessageDialog(frame, card.getMessage(), "Community Chest", JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
         chance.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(frame, "Chance Button Clicked!");
+                Cards.Card card = Cards.drawRandomChanceCard();
+                JOptionPane.showMessageDialog(frame, card.getMessage(), "Community Chest", JOptionPane.INFORMATION_MESSAGE);            
             }
         });
+
+        dice.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Monopoly.owen.movePlayer();  
+                diceDisplay.setText("Rolled: " + Monopoly.owen.getLocation()); 
+                Display.boardPanel.repaint();
+            }
+        });
+        
+        
+
 
         // Add the custom board
         boardPanel.setBounds(50, 50, 900, 900);
@@ -197,14 +225,8 @@ public class Display extends JFrame {
     }
 
     public static int choice(String title, String text, String[] options){
-        return JOptionPane.showOptionDialog(frame,
-                                            text,
-                                            title,
-                                            JOptionPane.YES_NO_OPTION,
-                                            JOptionPane.QUESTION_MESSAGE,
-                                            null,
-                                            options,
-                                            options[0]);
+        return JOptionPane.showOptionDialog(frame, text, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options,options[0]);
+
     }
 
     public static void setDiceDisplay(String text){
